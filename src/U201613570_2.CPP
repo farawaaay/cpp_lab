@@ -22,25 +22,21 @@ class STACK
     ~STACK();                      //销毁栈
 };
 
-STACK::STACK(int m) : elems(new int(m)), max(m)
-{
-    pos = 0;
-}
+STACK::STACK(int m) : elems(new int(m)), max(m) { pos = 0; }
 STACK::STACK(const STACK &s) : elems(new int[s.max]), max(s.max)
 {
     memcpy(this->elems, s.elems, (s.pos) * sizeof(int));
     this->pos = s.pos;
 }
-
-int STACK::size() const
+STACK::~STACK()
 {
-    return max;
+    free(this->elems);
+    this->pos = 0;
+    const_cast<int &>(this->max) = 0;
 }
 
-int STACK::howMany() const
-{
-    return pos;
-}
+int STACK::size() const { return max; }
+int STACK::howMany() const { return pos; }
 
 int STACK::getelem(int x) const
 {
@@ -87,13 +83,6 @@ void STACK::print() const
     return;
 }
 
-STACK::~STACK()
-{
-    free(this->elems);
-    this->pos = 0;
-    const_cast<int &>(this->max) = 0;
-}
-
 int main(int argc, char *argv[])
 {
     STACK *p;
@@ -124,6 +113,14 @@ int main(int argc, char *argv[])
                 case 'G':
                     printf("%d  ", g_value);
                     break;
+                case 'C':
+                {
+                    STACK *ap = new STACK(*p);
+                    delete p;
+                    p = ap;
+                    p->print();
+                    break;
+                }
                 default:
                     p->print();
                 }
@@ -133,16 +130,17 @@ int main(int argc, char *argv[])
         }
         else
         {
+            int num = atoi(argv[i]);
             switch (type)
             {
             case 'S':
-                p = new STACK(atoi(argv[i]));
+                p = new STACK(num);
                 break;
             case 'I':
-                p->push(atoi(argv[i]));
+                p->push(num);
                 break;
             case 'O':
-                for (int j = 0; j < atoi(argv[i]); j++)
+                for (int j = 0; j < num; j++)
                 {
                     int _ = 0;
                     p->pop(_);
@@ -150,21 +148,16 @@ int main(int argc, char *argv[])
                 break;
             case 'A':
             {
-                STACK *const ap = new STACK(*p);
-                delete p;
-                p = ap;
-                break;
-            }
-            case 'C':
-            {
-                STACK *cp;
+                STACK *cp = new STACK(num);
                 cp->assign(*p);
                 delete p;
                 p = cp;
                 break;
             }
             case 'G':
-                g_value = p->getelem(atoi(argv[i]));
+                g_value = p->getelem(num);
+                break;
+            default:
                 break;
             }
         }
