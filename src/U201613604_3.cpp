@@ -246,7 +246,7 @@ int main(int argc, char *argv[])
             // fprintf(fp, "%c  ", _g);
             cout << "G  ";
             // p[temp_];
-            if ((_temp = p[temp_]) == -1)
+            if ((_temp = (*p)[temp_]) == -1)
             {
                 // fprintf(fp, "%c", _e);
                 cout << 'E';
