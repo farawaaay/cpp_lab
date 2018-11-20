@@ -3,6 +3,8 @@
 #include <cstring>
 
 bool error = false;
+FILE *f;
+
 class STACK
 {
     int *const elems; //申请内存用于存放栈的元素
@@ -88,9 +90,22 @@ STACK &STACK::operator=(const STACK &s)
 int main(int argc, char *argv[])
 {
     STACK *p;
-    char *filename = argv[1];
+    char *filename = argv[0];
     char type = 'S';
     int g_value;
+
+    int dotIndex = -1;
+    int slashIndex = -1;
+    for (int i = strlen(filename) - 1; i >= 0; i--)
+    {
+        if (filename[i] == '.' && dotIndex == -1)
+            dotIndex = i;
+        if (filename[i] == '\\' && dotIndex != -1 && slashIndex == -1)
+            slashIndex = i;
+    }
+    filename[dotIndex] = 0;
+
+    f = fopen(strcat(filename + slashIndex + 1, ".TXT"), "w");
 
     for (int i = 2; i < argc + 1; i++)
     {

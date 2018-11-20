@@ -3,6 +3,7 @@
 #include <cstring>
 
 bool error = false;
+FILE *f;
 
 class STACK
 {
@@ -79,16 +80,29 @@ STACK &STACK::assign(const STACK &s)
 void STACK::print() const
 {
     for (int i = 0; i < this->pos; i++)
-        printf("%d  ", this->elems[i]);
+        fprintf(f, "%d  ", this->elems[i]);
     return;
 }
 
 int main(int argc, char *argv[])
 {
     STACK *p;
-    char *filename = argv[1];
+    char *filename = argv[0];
     char type = 'S';
     int g_value;
+
+    int dotIndex = -1;
+    int slashIndex = -1;
+    for (int i = strlen(filename) - 1; i >= 0; i--)
+    {
+        if (filename[i] == '.' && dotIndex == -1)
+            dotIndex = i;
+        if (filename[i] == '\\' && dotIndex != -1 && slashIndex == -1)
+            slashIndex = i;
+    }
+    filename[dotIndex] = 0;
+
+    f = fopen(strcat(filename + slashIndex + 1, ".TXT"), "w");
 
     for (int i = 2; i < argc + 1; i++)
     {
@@ -96,22 +110,22 @@ int main(int argc, char *argv[])
         {
             if (error)
             {
-                printf("%c  %c  ", type, 'E');
+                fprintf(f, "%c  %c  ", type, 'E');
                 break;
             }
             else
             {
-                printf("%c  ", type);
+                fprintf(f, "%c  ", type);
                 switch (type)
                 {
                 case 'S':
-                    printf("%d  ", p->size());
+                    fprintf(f, "%d  ", p->size());
                     break;
                 case 'N':
-                    printf("%d  ", p->howMany());
+                    fprintf(f, "%d  ", p->howMany());
                     break;
                 case 'G':
-                    printf("%d  ", g_value);
+                    fprintf(f, "%d  ", g_value);
                     break;
                 case 'C':
                 {
@@ -162,5 +176,5 @@ int main(int argc, char *argv[])
             }
         }
     }
-    printf("\n");
+    fprintf(f, "\n");
 }

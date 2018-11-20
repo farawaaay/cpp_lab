@@ -20,6 +20,8 @@ void print(const STACK *const p);                    //打印p指向的栈
 void destroySTACK(STACK *const p);                   //销毁p指向的栈
 
 bool error = false;
+FILE *f;
+
 void initSTACK(STACK *const p, int m)
 {
     p->elems = (int *)malloc(m * sizeof(int));
@@ -85,7 +87,7 @@ STACK *const assign(STACK *const p, const STACK &s)
 void print(const STACK *const p)
 {
     for (int i = 0; i < p->pos; i++)
-        printf("%d  ", p->elems[i]);
+        fprintf(f, "%d  ", p->elems[i]);
 }
 
 void destroySTACK(STACK *const p)
@@ -98,9 +100,22 @@ void destroySTACK(STACK *const p)
 int main(int argc, char *argv[])
 {
     STACK *p = (STACK *)malloc(sizeof(STACK));
-    char *filename = argv[1];
+    char *filename = argv[0];
     char type = 'S';
     int g_value;
+
+    int dotIndex = -1;
+    int slashIndex = -1;
+    for (int i = strlen(filename) - 1; i >= 0; i--)
+    {
+        if (filename[i] == '.' && dotIndex == -1)
+            dotIndex = i;
+        if (filename[i] == '\\' && dotIndex != -1 && slashIndex == -1)
+            slashIndex = i;
+    }
+    filename[dotIndex] = 0;
+
+    f = fopen(strcat(filename + slashIndex + 1, ".TXT"), "w");
 
     for (int i = 2; i < argc + 1; i++)
     {
@@ -108,22 +123,22 @@ int main(int argc, char *argv[])
         {
             if (error)
             {
-                printf("%c  %c  ", type, 'E');
+                fprintf(f, "%c  %c  ", type, 'E');
                 break;
             }
             else
             {
-                printf("%c  ", type);
+                fprintf(f, "%c  ", type);
                 switch (type)
                 {
                 case 'S':
-                    printf("%d  ", p->max);
+                    fprintf(f, "%d  ", p->max);
                     break;
                 case 'N':
-                    printf("%d  ", p->pos);
+                    fprintf(f, "%d  ", p->pos);
                     break;
                 case 'G':
-                    printf("%d  ", g_value);
+                    fprintf(f, "%d  ", g_value);
                     break;
                 default:
                     print(p);
@@ -169,5 +184,5 @@ int main(int argc, char *argv[])
             }
         }
     }
-    printf("\n");
+    fprintf(f, "\n");
 }
