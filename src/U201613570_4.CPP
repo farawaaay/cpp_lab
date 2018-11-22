@@ -190,6 +190,7 @@ QUEUE::~QUEUE() {
 int main(int argc, char* argv[]) {
   if (argc == 1) {
     int menNum, womenNum, m, f;
+    printf("Input amount of man, woman, and order of man,woman.\n(Split by comma):");
     if (scanf("%d,%d,%d,%d", &menNum, &womenNum, &m, &f) &&
         menNum && womenNum && m && f) {
       QUEUE queueMen(2 * menNum + 1);
