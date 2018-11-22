@@ -78,7 +78,10 @@ void print(const STACK* const p) {
 }
 
 void destroySTACK(STACK* const p) {
-  free(p->elems);
+  if (p->elems != 0) {
+    free(p->elems);
+  }
+  p->elems = 0;  // 防止反复析构
   p->max = 0;
   p->pos = 0;
 }
@@ -94,8 +97,10 @@ int main(int argc, char* argv[]) {
   for (int i = strlen(filename) - 1; i >= 0; i--) {
     if (filename[i] == '.' && dotIndex == -1)
       dotIndex = i;
-    if (filename[i] == '\\' && dotIndex != -1 && slashIndex == -1)
+    if (filename[i] == '\\' && dotIndex != -1 && slashIndex == -1) {
       slashIndex = i;
+      break;
+    }
   }
   filename[dotIndex] = 0;
 

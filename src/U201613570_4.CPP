@@ -51,7 +51,10 @@ STACK::STACK(const STACK& s)
   this->pos = s.pos;
 }
 STACK::~STACK() {
-  delete this->elems;
+  if (this->elems != 0) {
+    free(this->elems);
+  }
+  const_cast<int*&>(this->elems) = 0;  // 防止反复析构
   this->pos = 0;
   const_cast<int&>(this->max) = 0;
 }
@@ -113,6 +116,7 @@ QUEUE::operator int() const {
 }
 
 int QUEUE::full() const {
+  // 当左边的栈为满且右边的栈不为空，则视为队列满了
   return STACK::operator int() > 0 && int(s2) == s2.size();
 }
 
@@ -129,36 +133,38 @@ int QUEUE::operator[](int x) const {
 
 QUEUE& QUEUE::operator<<(int e) {
   if (full()) {
+    // 队列满了直接抛出错误
     error = true;
-  } else {
-    if (int(s2) < s2.size())
-      s2 << e;
-    else {
-      int x;
-      while (int(s2) > 0) {
-        s2 >> x;
-        STACK::operator<<(x);
-      }
-      s2 << e;
+    return *this;
+  }
+
+  if (int(s2) == s2.size()) {
+    // 将s2全部移到s1
+    int x;
+    while (int(s2) > 0) {
+      s2 >> x;
+      STACK::operator<<(x);
     }
   }
+  s2 << e;
   return *this;
 }
 
 QUEUE& QUEUE::operator>>(int& e) {
   if (int(*this) == 0) {
     error = true;
-  } else {
-    if (STACK::operator int() > 0)
-      STACK::operator>>(e);
-    else {
-      int x;
-      while (int(s2) > 1) {
-        s2 >> x;
-        STACK::operator<<(x);
-      }
-      s2 >> e;
+    return *this;
+  }
+
+  if (STACK::operator int() > 0)
+    STACK::operator>>(e);
+  else {
+    int x;
+    while (int(s2) > 1) {
+      s2 >> x;
+      STACK::operator<<(x);
     }
+    s2 >> e;
   }
   return *this;
 }
@@ -178,9 +184,38 @@ void QUEUE::print() const {
 
 QUEUE::~QUEUE() {
   // s2.~STACK();
+  // 不需要额外析构
 }
 
 int main(int argc, char* argv[]) {
+  if (argc == 1) {
+    int menNum, womenNum, m, f;
+    if (scanf("%d,%d,%d,%d", &menNum, &womenNum, &m, &f) &&
+        menNum && womenNum && m && f) {
+      QUEUE queueMen(2 * menNum + 1);
+      QUEUE queueWomen(2 * womenNum + 1);
+      for (int i = 0; i < menNum; ++i)
+        queueMen << i + 1;
+      for (int i = 0; i < womenNum; ++i)
+        queueWomen << i + 1;
+
+      int currentMan, currentWoman, counter = 1;
+      while (1) {
+        queueMen >> currentMan;
+        queueWomen >> currentWoman;
+        if (currentMan == m && currentWoman == f) {
+          printf("Round %d\n", counter);
+          break;
+        }
+        queueMen << currentMan;
+        queueWomen << currentWoman;
+        ++counter;
+      }
+    }
+
+    return 0;
+  }
+
   QUEUE* p;
   char* filename = argv[0];
   char type = 'S';
@@ -191,8 +226,10 @@ int main(int argc, char* argv[]) {
   for (int i = strlen(filename) - 1; i >= 0; i--) {
     if (filename[i] == '.' && dotIndex == -1)
       dotIndex = i;
-    if (filename[i] == '\\' && dotIndex != -1 && slashIndex == -1)
+    if (filename[i] == '\\' && dotIndex != -1 && slashIndex == -1) {
       slashIndex = i;
+      break;
+    }
   }
   filename[dotIndex] = 0;
 

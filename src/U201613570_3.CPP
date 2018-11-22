@@ -35,7 +35,10 @@ STACK::STACK(const STACK& s)
   this->pos = s.pos;
 }
 STACK::~STACK() {
-  free(this->elems);
+  if (this->elems != 0) {
+    free(this->elems);
+  }
+  const_cast<int*&>(this->elems) = 0;  // 防止反复析构
   this->pos = 0;
   const_cast<int&>(this->max) = 0;
 }
@@ -95,8 +98,10 @@ int main(int argc, char* argv[]) {
   for (int i = strlen(filename) - 1; i >= 0; i--) {
     if (filename[i] == '.' && dotIndex == -1)
       dotIndex = i;
-    if (filename[i] == '\\' && dotIndex != -1 && slashIndex == -1)
+    if (filename[i] == '\\' && dotIndex != -1 && slashIndex == -1) {
       slashIndex = i;
+      break;
+    }
   }
   filename[dotIndex] = 0;
 
